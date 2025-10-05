@@ -3,34 +3,29 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Fake in-memory DB
-fake_db = []
+# Fake DB
+fake_db = {
+    1: {"name": "Alice", "age": 30},
+    2: {"name": "Bob", "age": 25}
+}
 
-# Schema
 class User(BaseModel):
-    id: int
     name: str
-    email: str
+    age: int
 
-@app.get("/users")
-def get_users():
-    return {"name":"John Doe", "age":3, "gender":"Male"}
-
-@app.post("/users")
-def create_user(user: User):
-    fake_db.append(user)
-    return user
+@app.get("/")
+def read_root():
+    return fake_db
 
 @app.get("/users/{user_id}")
 def get_user(user_id: int):
-    for user in fake_db:
-        if user.id == user_id:
-            return user
-    raise HTTPException(status_code=404, detail="User not found")
+    user = fake_db.get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
-@app.delete("/users/{user_id}")
-def delete_user(user_id: int):
-    for i, user in enumerate(fake_db):
-        if user.id == user_id:
-            return fake_db.pop(i)
-    raise HTTPException(status_code=404, detail="User not found")
+@app.post("/users/")
+def create_user(user: User):
+    new_id = max(fake_db.keys()) + 1
+    fake_db[new_id] = user.dict()
+    return {"id": new_id, "user": user}
