@@ -6,6 +6,7 @@ from main import app, fake_db, User
 
 client = TestClient(app)
 
+
 # Reset fake_db before each test
 @pytest.fixture(autouse=True)
 def clear_db():
@@ -30,11 +31,10 @@ def test_create_user():
     assert data["id"] == 1
     assert data["name"] == "Alice"
     assert data["email"] == "alice@example.com"
-    assert len(fake_db) == 1  # Confirm user was added
+    assert len(fake_db) == 1
 
 
 def test_get_user_found():
-    # Add a user manually
     user = User(id=2, name="Bob", email="bob@example.com")
     fake_db.append(user)
 
@@ -59,7 +59,7 @@ def test_delete_user_found():
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == 3
-    assert len(fake_db) == 0  # Confirm user was deleted
+    assert len(fake_db) == 0
 
 
 def test_delete_user_not_found():
